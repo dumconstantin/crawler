@@ -10,9 +10,9 @@
   "license": "MIT",
   "dependencies": {
     "bluebird": "^3.4.7",
-    "jsdom": "^9.9.1",
+    "cheerio": "^0.22.0",
     "lodash": "^4.17.4",
     "most": "^1.2.1",
-    "request": "^2.79.0"
+    "request-promise": "^4.1.1"
   }
 }

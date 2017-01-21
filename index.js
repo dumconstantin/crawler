@@ -1,9 +1,9 @@
 'use strict'
 const most = require('most')
-const request = require('request')
+const cheerio = require('cheerio')
+const request = require('request-promise')
 const EventEmitter = require('events')
 const emitter = new EventEmitter()
-const jsdom = require('jsdom')
 const Promise = require('bluebird')
 const _ = require('lodash/fp')
 
@@ -17,27 +17,45 @@ function stripUrls($, selector, prop) {
   return urls
 }
 
+const normalizeUrls = _.map(x => {
+  if (x[0] === '/') {
+    x = startUrl + x
+  }
+  return x
+})
+
+const retrieveUrls = _.pipe(
+  stripUrls,
+  normalizeUrls
+  // categorizeUrls
+)
+
+const resolveUrl = x => most.fromPromise(request({
+  url: x,
+  transform: body => ({
+    url: x,
+    $: cheerio.load(body)
+  })
+}))
+
 const stream = most
-  .fromEvent('html', emitter)
-  .chain(x => {
-    return most.fromPromise(new Promise((resolve, reject) => {
-      jsdom.env(x, ['http://code.jquery.com/jquery.js'], (err, window) => {
-        if (err) {
-          reject(err)
-        } else {
-          let $ = window.$
-          let aHrefs = stripUrls($, 'a', 'href')
-          let imgSrc = stripUrls($, 'img', 'src')
+  .fromEvent('url', emitter)
+  .chain(resolveUrl)
+  .map(x => {
+    let hrefs = retrieveUrls(x.$, 'a', 'href')
+    let img = retrieveUrls(x.$, 'img', 'src')
 
-          let result = {
-            aHrefs,
-            imgSrc
-          }
+    // hrefs = categorizeHrefs(hrefs)
 
-          resolve(result)
-        }
-      })
-    }))
+    let result = {
+      parent: x.url,
+      hrefs,
+      src: {
+        img
+      }
+    }
+
+    return result
   })
 
 stream
@@ -47,6 +65,4 @@ stream
     error: x => console.error('Error', x)
   })
 
-request(startUrl, (err, response, body) => {
-  emitter.emit('html', body)
-})
+emitter.emit('url', startUrl)
