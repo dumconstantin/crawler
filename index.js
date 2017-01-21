@@ -5,6 +5,7 @@ const EventEmitter = require('events')
 const emitter = new EventEmitter()
 const jsdom = require('jsdom')
 const Promise = require('bluebird')
+const _ = require('lodash/fp')
 
 const startUrl = 'https://google.com'
 
@@ -12,12 +13,19 @@ const stream = most
   .fromEvent('html', emitter)
   .chain(x => {
     return most.fromPromise(new Promise((resolve, reject) => {
-      jsdom.env('<p>asd</p>', ['http://code.jquery.com/jquery.js'], (err, window) => {
+      jsdom.env(x, ['http://code.jquery.com/jquery.js'], (err, window) => {
         if (err) {
           reject(err)
         } else {
-          let links = window.document.querySelector('a').innerText
-          resolve(links)
+          let $ = window.$
+          let links = $('a').toArray()
+
+          let hrefs = _.reduce((acc, x) => {
+            acc.push($(x).attr('href'))
+            return acc
+          }, [], links)
+
+          resolve(hrefs)
         }
       })
     }))
