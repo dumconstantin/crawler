@@ -9,6 +9,7 @@
   "author": "Constantin Dumitrescu <dum.constantin@gmail.com>",
   "license": "MIT",
   "dependencies": {
+    "bluebird": "^3.4.7",
     "jsdom": "^9.9.1",
     "most": "^1.2.1",
     "request": "^2.79.0"
