@@ -9,6 +9,14 @@ const _ = require('lodash/fp')
 
 const startUrl = 'https://google.com'
 
+function stripUrls($, selector, prop) {
+  let urls = $(selector)
+    .toArray()
+    .map(x => $(x).attr(prop))
+
+  return urls
+}
+
 const stream = most
   .fromEvent('html', emitter)
   .chain(x => {
@@ -18,14 +26,15 @@ const stream = most
           reject(err)
         } else {
           let $ = window.$
-          let links = $('a').toArray()
+          let aHrefs = stripUrls($, 'a', 'href')
+          let imgSrc = stripUrls($, 'img', 'src')
 
-          let hrefs = _.reduce((acc, x) => {
-            acc.push($(x).attr('href'))
-            return acc
-          }, [], links)
+          let result = {
+            aHrefs,
+            imgSrc
+          }
 
-          resolve(hrefs)
+          resolve(result)
         }
       })
     }))
