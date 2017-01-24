@@ -7,28 +7,72 @@ const emitter = new EventEmitter()
 const Promise = require('bluebird')
 const _ = require('lodash/fp')
 
-let startURL
+let startUrl
+let urls = []
+let linking = []
 
-function stripUrls($, selector, prop) {
-  let urls = $(selector)
+function getProps($, selector, prop) {
+  return $(selector)
     .toArray()
     .map(x => $(x).attr(prop))
+}
+
+function normalizeUrls(pageUrl, urls) {
+
+
+  // Ensure all urls contain a domain name.
+  //
+  // For the sake of simplicity, character matching is used.
+  // A regex would be more suitable to split the string into
+  // parts and thoroughly analyze the url.
+  urls = urls.map(x => {
+
+    // Unnecessary for the project scope:
+    // - query params
+    // - on-page links
+    // - trailing slash
+    if (x.indexOf('?') >= 0) {
+      x = x.substr(0, x.indexOf('?'))
+    }
+
+    if (x.indexOf('#') >= 0) {
+      x = x.substr(0, x.indexOf('#'))
+    }
+
+    if (x[x.length - 1] === '/') {
+      x = x.substr(0, x.length - 1)
+    }
+    // On page links
+    if (x[0] === '/') {
+      x = pageUrl + x
+    }
+
+    return x
+  })
+
+  urls = urls.filter(x => x !== '')
+
+  // Remove duplicates
+  urls = _.uniq(urls)
 
   return urls
 }
 
-const normalizeUrls = _.map(x => {
-  if (x[0] === '/') {
-    x = startURL + x
-  }
-  return x
-})
+function categorizeUrls(urls) {
+  return urls.reduce((acc, x) => {
 
-const retrieveUrls = _.pipe(
-  stripUrls,
-  normalizeUrls
-  // categorizeUrls
-)
+    if (x.indexOf(startUrl) >= 0) {
+      acc.inbound.push(x)
+    } else {
+      acc.outbound.push(x)
+    }
+
+    return acc
+  }, {
+    inbound: [],
+    outbound: []
+  })
+}
 
 const resolveUrl = x => most.fromPromise(request({
   url: x,
@@ -42,14 +86,17 @@ const stream = most
   .fromEvent('url', emitter)
   .chain(resolveUrl)
   .map(x => {
-    let hrefs = retrieveUrls(x.$, 'a', 'href')
-    let img = retrieveUrls(x.$, 'img', 'src')
+    let links = getProps(x.$, 'a', 'href')
 
-    // hrefs = categorizeHrefs(hrefs)
+    links = normalizeUrls(x.url, links)
+    links = categorizeUrls(links)
+
+    // let img = getProps(x.$, 'img', 'src')
+    let img = []
 
     let result = {
-      parent: x.url,
-      hrefs,
+      page: x.url,
+      links,
       src: {
         img
       }
@@ -66,11 +113,11 @@ stream
   })
 
 
-// Get the first argument as the startURL
+// Get the first argument as the startUrl
 process.argv.forEach(function (val, index, array) {
   if (index === 2) {
-    startURL = val
-    emitter.emit('url', startURL)
+    startUrl = val
+    emitter.emit('url', startUrl)
   }
 })
 
