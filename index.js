@@ -7,7 +7,7 @@ const emitter = new EventEmitter()
 const Promise = require('bluebird')
 const _ = require('lodash/fp')
 
-const startUrl = 'https://google.com'
+let startURL
 
 function stripUrls($, selector, prop) {
   let urls = $(selector)
@@ -19,7 +19,7 @@ function stripUrls($, selector, prop) {
 
 const normalizeUrls = _.map(x => {
   if (x[0] === '/') {
-    x = startUrl + x
+    x = startURL + x
   }
   return x
 })
@@ -65,4 +65,12 @@ stream
     error: x => console.error('Error', x)
   })
 
-emitter.emit('url', startUrl)
+
+// Get the first argument as the startURL
+process.argv.forEach(function (val, index, array) {
+  if (index === 2) {
+    startURL = val
+    emitter.emit('url', startURL)
+  }
+})
+
