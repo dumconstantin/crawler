@@ -19,23 +19,24 @@ function getProps($, selector, prop) {
 
 function normalizeUrls(pageUrl, urls) {
 
+  urls = _.filter(x => x !== undefined, urls)
 
   // Ensure all urls contain a domain name.
   //
   // For the sake of simplicity, character matching is used.
   // A regex would be more suitable to split the string into
   // parts and thoroughly analyze the url.
-  urls = urls.map(x => {
+  urls = _.map(x => {
 
     // Unnecessary for the project scope:
     // - query params
     // - on-page links
     // - trailing slash
-    if (x.indexOf('?') >= 0) {
+    if (x.indexOf('?') > -1) {
       x = x.substr(0, x.indexOf('?'))
     }
 
-    if (x.indexOf('#') >= 0) {
+    if (x.indexOf('#') > -1) {
       x = x.substr(0, x.indexOf('#'))
     }
 
@@ -48,9 +49,9 @@ function normalizeUrls(pageUrl, urls) {
     }
 
     return x
-  })
+  }, urls)
 
-  urls = urls.filter(x => x !== '')
+  urls = _.filter(x => x !== '', urls)
 
   // Remove duplicates
   urls = _.uniq(urls)
@@ -58,56 +59,111 @@ function normalizeUrls(pageUrl, urls) {
   return urls
 }
 
-function categorizeUrls(urls) {
-  return urls.reduce((acc, x) => {
-
-    if (x.indexOf(startUrl) >= 0) {
-      acc.inbound.push(x)
-    } else {
-      acc.outbound.push(x)
-    }
-
-    return acc
-  }, {
-    inbound: [],
-    outbound: []
-  })
-}
-
-const resolveUrl = x => most.fromPromise(request({
-  url: x,
-  transform: body => ({
-    url: x,
-    $: cheerio.load(body)
-  })
-}))
-
-const stream = most
-  .fromEvent('url', emitter)
-  .chain(resolveUrl)
-  .map(x => {
-    let links = getProps(x.$, 'a', 'href')
-
-    links = normalizeUrls(x.url, links)
-    links = categorizeUrls(links)
-
-    // let img = getProps(x.$, 'img', 'src')
-    let img = []
-
-    let result = {
-      page: x.url,
-      links,
-      src: {
-        img
+function prepareUrls(urls) {
+  urls =_.reduce((acc, x) => {
+    let y = {
+      url: x,
+      props: {
+        inbound: _.startsWith(startUrl, x),
+        img: _.endsWith(x, '.img'),
       }
     }
 
-    return result
+    acc.push(y)
+
+    return acc
+  }, [], urls)
+
+  return urls
+}
+
+function getUrlContent(x) {
+  return most.fromPromise(request({
+    url: x,
+    transform: body => ({
+      url: x,
+      $: cheerio.load(body)
+    })
+  }))
+}
+
+function parseContent(x) {
+  let urls = getProps(x.$, 'a', 'href')
+
+  urls = normalizeUrls(x.url, urls)
+  urls = prepareUrls(urls)
+  return {
+    parent: x.url,
+    urls
+  }
+}
+
+const queueing = most
+  .fromEvent('queue', emitter)
+  .scan((a, b) => {
+    a = a.concat(b)
+    a = _.uniq(a)
+    return a
+  }, [])
+  .filter(x => x.length > 0)
+  .forEach(x => {
+    console.log('queueing', x)
+    // emitter.emit('crawl', x[0])
   })
 
-stream
+const crawler = most
+  .fromEvent('crawl', emitter)
+  .chain(getUrlContent)
+  .map(parseContent)
+  .scan((a, b) => {
+
+    if (a.urls.length === 0) {
+      a.urls.push(startUrl)
+      a.crawled.push(startUrl)
+
+      a.props[startUrl] = {
+        inbound: true,
+        img: false
+      }
+    }
+
+    let j = a.urls.indexOf(b.parent)
+    a.crawled.push(b.parent)
+
+    while (b.urls.length > 0) {
+      let x = b.urls.shift()
+
+      if (a.urls.indexOf(x.url) === -1) {
+        a.urls.push(x.url)
+        a.props[x.url] = x.props
+      }
+
+      let i = a.urls.indexOf(x.url)
+      a.relations.push([j, i])
+    }
+
+    return a
+  }, {
+    urls: [],
+    crawled: [],
+    props: {},
+    relations: []
+  })
+
+crawler
   .subscribe({
-    next: x => console.log('Data', x),
+    next: data => {
+      console.log('Data', data.urls.length),
+
+      // Add urls that haven't been crawled or already queued
+      // to the queue
+      data.urls
+        .filter(x =>
+          data.crawled.indexOf(x) === -1
+          && data.props[x].inbound === true
+        )
+        .map(x => emitter.emit('queue', x))
+    },
     complete: x => console.log('Finished', x),
     error: x => console.error('Error', x)
   })
@@ -117,7 +173,7 @@ stream
 process.argv.forEach(function (val, index, array) {
   if (index === 2) {
     startUrl = val
-    emitter.emit('url', startUrl)
+    emitter.emit('crawl', startUrl)
   }
 })
 
