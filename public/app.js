@@ -71,9 +71,14 @@ function createGraph(graph) {
     .attr('class', d => `group-${d.group}`)
     .call(drag)
 
-    let tooltip = svg
+    let tooltipContainer = svg
       .append('g')
       .attr('class', 'tooltip')
+
+    let tooltipBg = tooltipContainer
+      .append('rect')
+
+    let tooltip = tooltipContainer
       .append('text')
 
     node
@@ -81,19 +86,28 @@ function createGraph(graph) {
       .on('mouseout', hideTooltip)
 
   function showTooltip(node) {
-    tooltip
-      .text(node.id)
+
+    tooltip.text(node.type + ' - ' + node.id)
+
+    let box = tooltip.node().getBBox()
+
+    let x = node.x - box.width / 2
+    let y = node.y - 30
 
     tooltip
-      .text(node.id)
-      .attr('x', function () {
-       return node.x - this.getComputedTextLength() / 2
-      })
-      .attr('y', node.y - 10)
+      .attr('x', x)
+      .attr('y', y)
+
+    tooltipBg
+      .attr('x', x - 10)
+      .attr('y', y - 20)
+      .attr('width', box.width + 20)
+      .attr('height', box.height + 15)
   }
 
   function hideTooltip(node) {
     tooltip.text('')
+    tooltipBg.attr('width', 0)
   }
 
   simulation

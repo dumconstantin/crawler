@@ -71,7 +71,7 @@ function prepareUrls(urls) {
 
     let ext = x.match(/\.([a-z0-9]+)$/i)
 
-    y.type = ext ? ext[1] : 'unknown'
+    y.props.type = ext ? ext[1] : 'html'
 
     acc.push(y)
 
@@ -91,8 +91,18 @@ function getUrlContent(x) {
   }))
 }
 
-function parseContent(x) {
-  let urls = getProps(x.$, 'a', 'href')
+let types = {
+  a: 'href',
+  img: 'src',
+  script: 'src',
+  link: 'href'
+}
+
+const parseContent = _.curry((types, x) => {
+  let urls = Object.keys(types).reduce((acc, y) => {
+    acc = acc.concat(getProps(x.$, y, types[y]))
+    return acc
+  }, [])
 
   urls = normalizeUrls(x.url, urls)
   urls = prepareUrls(urls)
@@ -100,7 +110,7 @@ function parseContent(x) {
     parent: x.url,
     urls
   }
-}
+})
 
 const queueing = most
   .fromEvent('queue', emitter)
@@ -114,7 +124,7 @@ const queueing = most
 const crawler = most
   .fromEvent('crawl', emitter)
   .chain(getUrlContent)
-  .map(parseContent)
+  .map(parseContent(types))
   .scan((a, b) => {
 
     let j
@@ -124,7 +134,7 @@ const crawler = most
 
       a.props[b.parent] = {
         inbound: true,
-        img: false
+        type: 'html'
       }
       j = 0
     } else {
@@ -156,7 +166,6 @@ crawler
   .subscribe({
     next: data => {
 
-      console.log('Data', data.urls.length)
       fs.writeFileSync('public/data.json', JSON.stringify(data, null, ' '))
 
       // Add urls that haven't been crawled or already queued
