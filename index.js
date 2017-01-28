@@ -6,6 +6,7 @@ const EventEmitter = require('events')
 const emitter = new EventEmitter()
 const Promise = require('bluebird')
 const _ = require('lodash/fp')
+const fs = require('fs')
 
 let startUrl
 let urls = []
@@ -100,15 +101,11 @@ function parseContent(x) {
 
 const queueing = most
   .fromEvent('queue', emitter)
-  .scan((a, b) => {
-    a = a.concat(b)
-    a = _.uniq(a)
-    return a
-  }, [])
   .filter(x => x.length > 0)
+  .map(_.take(1))
   .forEach(x => {
     console.log('queueing', x)
-    // emitter.emit('crawl', x[0])
+    emitter.emit('crawl', x[0])
   })
 
 const crawler = most
@@ -153,16 +150,19 @@ const crawler = most
 crawler
   .subscribe({
     next: data => {
-      console.log('Data', data.urls.length),
+
+      console.log('Data', data.urls.length)
+      fs.writeFileSync('public/data.json', JSON.stringify(data, null, ' '))
 
       // Add urls that haven't been crawled or already queued
       // to the queue
-      data.urls
+      let urls = data.urls
         .filter(x =>
           data.crawled.indexOf(x) === -1
           && data.props[x].inbound === true
         )
-        .map(x => emitter.emit('queue', x))
+
+      emitter.emit('queue', urls)
     },
     complete: x => console.log('Finished', x),
     error: x => console.error('Error', x)
