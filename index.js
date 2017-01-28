@@ -65,10 +65,13 @@ function prepareUrls(urls) {
     let y = {
       url: x,
       props: {
-        inbound: _.startsWith(startUrl, x),
-        img: _.endsWith(x, '.img'),
+        inbound: _.startsWith(startUrl, x)
       }
     }
+
+    let ext = x.match(/\.([a-z0-9]+)$/i)
+
+    y.type = ext ? ext[1] : 'unknown'
 
     acc.push(y)
 
@@ -114,18 +117,20 @@ const crawler = most
   .map(parseContent)
   .scan((a, b) => {
 
+    let j
     if (a.urls.length === 0) {
-      a.urls.push(startUrl)
-      a.crawled.push(startUrl)
+      a.urls.push(b.parent)
+      a.crawled.push(b.parent)
 
-      a.props[startUrl] = {
+      a.props[b.parent] = {
         inbound: true,
         img: false
       }
+      j = 0
+    } else {
+      j = a.urls.indexOf(b.parent)
+      a.crawled.push(b.parent)
     }
-
-    let j = a.urls.indexOf(b.parent)
-    a.crawled.push(b.parent)
 
     while (b.urls.length > 0) {
       let x = b.urls.shift()
