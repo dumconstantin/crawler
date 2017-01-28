@@ -73,12 +73,40 @@ function createGraph(graph) {
       .append('title')
       .text(function(d) { return d.id })
 
+    node
+      .on('mouseover', showTooltip)
+      .on('mouseout', hideTooltip)
+
+   let tooltip = svg
+     .append('g')
+     .attr('class', 'tooltip')
+
+    let tooltipText = tooltip
+      .append('text')
+
   simulation
     .nodes(graph.nodes)
     .on('tick', ticked)
 
   simulation.force('link')
     .links(graph.links)
+
+
+  function showTooltip(node) {
+    tooltipText
+      .text(node.id)
+
+    tooltipText
+      .text(node.id)
+      .attr('x', function () {
+       return node.x - this.getComputedTextLength() / 2
+      })
+      .attr('y', node.y - 100)
+  }
+
+  function hideTooltip(node) {
+    tooltipText.text('')
+  }
 
   function ticked() {
     link
