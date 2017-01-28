@@ -10,16 +10,20 @@ $.get('/data.json', x => {
   }
 
   x.urls.forEach((y, i) => {
+    let prop = x.props[y]
     let group
     if (i === 0) {
       group = 1
-    } else {
+    } else if (prop.inbound === true) {
       group = 2
+    } else {
+      group = 3
     }
 
     graph.nodes.push({
       id: y,
-      group: group
+      group: group,
+      type: prop.type
     })
   })
 
@@ -33,7 +37,6 @@ $.get('/data.json', x => {
 
   createGraph(graph)
 })
-
 
 function createGraph(graph) {
 
@@ -65,24 +68,33 @@ function createGraph(graph) {
     .selectAll('circle')
     .data(graph.nodes)
     .enter().append('circle')
-    .attr('r', 5)
-    .attr('fill', function(d) { return color(d.group) })
+    .attr('class', d => `group-${d.group}`)
     .call(drag)
 
-    node
-      .append('title')
-      .text(function(d) { return d.id })
+    let tooltip = svg
+      .append('g')
+      .attr('class', 'tooltip')
+      .append('text')
 
     node
       .on('mouseover', showTooltip)
       .on('mouseout', hideTooltip)
 
-   let tooltip = svg
-     .append('g')
-     .attr('class', 'tooltip')
+  function showTooltip(node) {
+    tooltip
+      .text(node.id)
 
-    let tooltipText = tooltip
-      .append('text')
+    tooltip
+      .text(node.id)
+      .attr('x', function () {
+       return node.x - this.getComputedTextLength() / 2
+      })
+      .attr('y', node.y - 10)
+  }
+
+  function hideTooltip(node) {
+    tooltip.text('')
+  }
 
   simulation
     .nodes(graph.nodes)
@@ -90,23 +102,6 @@ function createGraph(graph) {
 
   simulation.force('link')
     .links(graph.links)
-
-
-  function showTooltip(node) {
-    tooltipText
-      .text(node.id)
-
-    tooltipText
-      .text(node.id)
-      .attr('x', function () {
-       return node.x - this.getComputedTextLength() / 2
-      })
-      .attr('y', node.y - 100)
-  }
-
-  function hideTooltip(node) {
-    tooltipText.text('')
-  }
 
   function ticked() {
     link
