@@ -38,8 +38,6 @@ socket.on('data', x => {
   urls.crawled = x.crawled.length
   urls.remaining = urls.count - urls.crawled
 
-
-
   Object.keys(urls).forEach(y => {
     $(`[data-id="${y}"]`).text(urls[y])
   })
