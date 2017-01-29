@@ -25,3 +25,39 @@ npm install && npm start
 * [Express](http://expressjs.com)
 * [Socket.io](http://socket.io)
 * [Most](https://github.com/cujojs/most)
+
+### Project breakdown
+
+```
+/server.js
+```
+the logic for serving crawling results to clients
+
+````
+/src/crawler.js
+```
+the crawler and queue subscriptions
+
+```
+/src/fn/..
+```
+the functions used for processing urls
+
+```
+/src/streams/...
+```
+the streams definitions for the crawler and queue
+
+```
+/public/..
+```
+the web client that contains the graph d3 rendering
+
+
+
+
+
+
+
+
+
