@@ -1,4 +1,5 @@
 
+var socket = io()
 
 $.get('/data.json', x => {
 
