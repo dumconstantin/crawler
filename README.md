@@ -20,8 +20,8 @@ npm install && npm start
 
 ### Technologies used
 
-* (d3)[https://github.com/d3/d3)
-* (Docker)[https://www.docker.com]
-* (Express)[http://expressjs.com]
-* (Socket.io)[http://socket.io]
-* (MostJS)[https://github.com/cujojs/most]
+* [d3](https://github.com/d3/d3)
+* [Docker](https://www.docker.com)
+* [Express](http://expressjs.com)
+* [Socket.io](http://socket.io)
+* [MostJS](https://github.com/cujojs/most)
