@@ -12,19 +12,37 @@ $('form').on('submit', e => {
 
 socket.on('data', x => {
   let crawled = x.crawled.length
-  let urls = x.urls.filter(y =>
-    x.props[y].inbound === true
-    && x.props[y].type === 'html'
-  ).length
-  let remaining = crawled - queued
 
-  $('p').text(`
+  let urls = x.urls.reduce((acc, y) => {
 
-    Queued: ${queued}
-    Crawled: ${crawled}
-    Remaining: ${remaining}
+    if (x.props[y].type === 'html') {
+      acc.count += 1
+    } else {
+      acc.static += 1
+    }
 
-    `)
+    if (x.props[y].inbound === true) {
+      acc.inbound += 1
+    } else {
+      acc.outbound += 1
+    }
+
+    return acc
+  }, {
+    count: 0,
+    static: 0,
+    inbound: 0,
+    outbound: 0
+  })
+
+  urls.crawled = x.crawled.length
+  urls.remaining = urls.count - urls.crawled
+
+
+
+  Object.keys(urls).forEach(y => {
+    $(`[data-id="${y}"]`).text(urls[y])
+  })
 
 })
 
