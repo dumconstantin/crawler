@@ -18,6 +18,13 @@ cd crawler
 npm install && npm start
 ```
 
+### Known issues
+
+There are several known issues:
+* Queueing only handles one url at a time
+* Error handling is well implemented - currently 'forever' takes care of restarting the system
+* And quite a lot more :)
+
 ### Technologies used
 
 * [d3](https://github.com/d3/d3)
