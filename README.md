@@ -23,6 +23,8 @@ npm install && npm start
 There are several known issues:
 * Queueing only handles one url at a time
 * Error handling is well implemented - currently 'forever' takes care of restarting the system
+* 404 currently fails the system
+* CPU intensive
 * And quite a lot more :)
 
 ### Technologies used
