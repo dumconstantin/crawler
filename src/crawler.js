@@ -4,6 +4,7 @@ const EventEmitter = require('events')
 const crawl = require('./streams/crawl')
 const queue = require('./streams/queue')
 
+
 module.exports = function (url) {
   let emitter = new EventEmitter()
   let crawler = crawl(emitter)
@@ -22,7 +23,9 @@ module.exports = function (url) {
     .subscribe({
       next: x => {
         console.log('Triggering queued', x)
-        emitter.emit('crawl', x[0])
+        x.forEach(y => {
+          emitter.emit('crawl', y)
+        })
       },
       complete: x => console.log('Queue is empty'),
       error: x => console.error(x, x.stack)

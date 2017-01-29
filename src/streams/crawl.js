@@ -35,8 +35,6 @@ module.exports = emitter =>
 
         if (a.urls.indexOf(x) === -1) {
           a.urls.push(x)
-        } else {
-
         }
 
         let i = a.urls.indexOf(x)
