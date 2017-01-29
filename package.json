@@ -5,16 +5,17 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
+    "start": "WEB_PORT=8080 node server.js",
+    "docker:build": "docker build -t dumconstantin/webcrawler .",
+    "docker:start": "npm run docker:stop && docker run -p 8080:8080 -e WEB_PORT=8080 --name webcrawler dumconstantin/webcrawler",
+    "docker:stop": "docker rm -f webcrawler > /dev/null || :"
   },
   "author": "Constantin Dumitrescu <dum.constantin@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "bluebird": "^3.4.7",
     "cheerio": "^0.22.0",
     "lodash": "^4.17.4",
     "most": "^1.2.1",
-    "portfinder": "^1.0.12",
     "request-promise": "^4.1.1",
     "socket.io": "^1.7.2"
   },

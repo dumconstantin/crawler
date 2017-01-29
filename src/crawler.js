@@ -16,19 +16,25 @@ module.exports = function (url) {
       emitter.emit('data', data)
     },
     complete: x => console.log('Crawler finished', x),
-    error: x => console.error(x, x.stack)
+    error: x => {
+      console.error(x, x.stack)
+      emitter.emit('error', x)
+    }
   })
 
   queueing
     .subscribe({
       next: x => {
-        console.log('Triggering queued', x)
+        console.log('Triggering queue', x)
         x.forEach(y => {
           emitter.emit('crawl', y)
         })
       },
       complete: x => console.log('Queue is empty'),
-      error: x => console.error(x, x.stack)
+      error: x => {
+        console.error(x, x.stack)
+        emitter.emit('error', x)
+      }
     })
 
 

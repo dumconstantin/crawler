@@ -7,6 +7,8 @@ const http = require('http').Server(app)
 const io = require('socket.io')(http)
 const crawler = require('./src/crawler')
 
+const port = process.env.WEB_PORT
+
 const staticPath = path.join(__dirname, '/public')
 app.use(express.static(staticPath))
 
@@ -15,20 +17,19 @@ app.get('/', (req, res) => {
 })
 
 io.on('connection', function(socket){
+  let events = ['data', 'error']
 
   socket.on('start-url', url => {
     let emitter = crawler(url)
 
-    emitter.on('data', x => {
-      socket.emit('data', x)
+    events.forEach(x => {
+      emitter.on(x, y => socket.emit(x, y))
     })
 
   })
 
 })
 
-portfinder.getPort((err, port) => {
-  http.listen(port, function() {
-    console.log(`Open http://localhost:${port} to view the cralwer`)
-  })
+http.listen(port, function() {
+  console.log(`Open http://localhost:${port} to view the cralwer`)
 })

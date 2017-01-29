@@ -46,6 +46,10 @@ socket.on('data', x => {
 
 })
 
+socket.on('error', x => {
+  console.error(x)
+  alert(x)
+})
 
 socket.on('data', x => {
 
