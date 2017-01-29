@@ -1,0 +1,48 @@
+
+
+.graph {
+  height: 100vh;
+}
+
+.sidebar {
+  text-align: center;
+}
+
+.links line {
+  stroke: #999;
+  stroke-opacity: 0.6;
+}
+
+.nodes circle {
+  stroke: #fff;
+  stroke-width: 1.5px;
+}
+
+.nodes circle:hover {
+  stroke: red;
+}
+
+.tooltip text {
+  font-weight: 300;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serf;
+  font-size: 14px;
+}
+
+.tooltip rect {
+  fill: rgba(10, 10, 10, 0.2);
+}
+
+.group-1 {
+  fill: #6fccdd;
+  r: 20;
+}
+
+.group-2 {
+  fill: #faed23;
+  r: 5;
+}
+
+.group-3 {
+  fill: #f27aaa;
+  r: 5;
+}

@@ -1,58 +1,33 @@
 <!doctype html>
 <html lang="">
 <head>
+  <link rel="stylesheet" href="/css/pure.css" />
+  <link rel="stylesheet" href="/css/app.css" />
 
 </head>
 <body>
+  <div class="pure-g">
+    <div class="graph pure-u-19-24"><svg></svg></div>
 
-<style>
+    <div class="sidebar pure-u-5-24">
+      <h1>Website crawler</h1>
+      <form class="pure-form">
+        <fieldset>
+          <legend>Enter an URL:</legend>
 
-.links line {
-  stroke: #999;
-  stroke-opacity: 0.6;
-}
+          <input type="text" placeholder="http://">
 
-.nodes circle {
-  stroke: #fff;
-  stroke-width: 1.5px;
-}
+          <button type="submit" class="pure-button pure-button-primary">Crawl</button>
+        </fieldset>
+      </form>
+    </div>
 
-.nodes circle:hover {
-  stroke: red;
-}
+  </div>
 
-.tooltip text {
-  font-weight: 300;
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serf;
-  font-size: 14px;
-}
-
-.tooltip rect {
-  fill: rgba(10, 10, 10, 0.2);
-}
-
-.group-1 {
-  fill: #6fccdd;
-  r: 20;
-}
-
-.group-2 {
-  fill: #faed23;
-  r: 5;
-}
-
-.group-3 {
-  fill: #f27aaa;
-  r: 5;
-}
-
-</style>
-
-  <svg></svg>
   <script src="/socket.io/socket.io.js"></script>
   <script src="/js/jquery.js"></script>
   <script src="//d3js.org/d3.v4.min.js"></script>
-  <script src="/app.js"></script>
+  <script src="/js/app.js"></script>
 </body>
 </html>
 

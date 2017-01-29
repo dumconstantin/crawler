@@ -1,9 +1,11 @@
+'use strict'
 const path = require('path')
 const express = require('express')
 const app = express()
 const portfinder = require('portfinder')
 const http = require('http').Server(app)
 const io = require('socket.io')(http)
+const crawler = require('./src/crawler')
 
 const staticPath = path.join(__dirname, '/public')
 app.use(express.static(staticPath))
@@ -13,7 +15,16 @@ app.get('/', (req, res) => {
 })
 
 io.on('connection', function(socket){
-  console.log('a user connected')
+
+  socket.on('start-url', url => {
+    let emitter = crawler(url)
+
+    emitter.on('data', x => {
+      socket.emit('data', x)
+    })
+
+  })
+
 })
 
 portfinder.getPort((err, port) => {

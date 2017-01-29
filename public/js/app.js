@@ -1,9 +1,16 @@
 
 var socket = io()
 
-$.get('/data.json', x => {
+socket.emit('start-url', 'https://google.com')
 
-  let svg = $('svg').attr('width', $(window).width()).attr('height', $(window).height())
+socket.on('data', x => {
+
+  let svg = $('svg')
+
+  let w = svg.parent().width()
+  let h = svg.parent().height()
+
+  svg.attr('width', w).attr('height', h)
 
   var graph = {
     nodes: [],
@@ -44,6 +51,8 @@ function createGraph(graph) {
   let svg = d3.select('svg'),
       width = +svg.attr('width'),
       height = +svg.attr('height')
+
+  svg.selectAll("*").remove()
 
   let color = d3.scaleOrdinal(d3.schemeCategory20)
 
