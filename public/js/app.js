@@ -1,7 +1,33 @@
 
 var socket = io()
 
-socket.emit('start-url', 'https://google.com')
+$('form').on('submit', e => {
+  e.preventDefault()
+
+  let url = $('input[name="start-url"]').val()
+
+  socket.emit('start-url', url)
+
+})
+
+socket.on('data', x => {
+  let crawled = x.crawled.length
+  let urls = x.urls.filter(y =>
+    x.props[y].inbound === true
+    && x.props[y].type === 'html'
+  ).length
+  let remaining = crawled - queued
+
+  $('p').text(`
+
+    Queued: ${queued}
+    Crawled: ${crawled}
+    Remaining: ${remaining}
+
+    `)
+
+})
+
 
 socket.on('data', x => {
 

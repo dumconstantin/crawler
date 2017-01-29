@@ -15,11 +15,19 @@
         <fieldset>
           <legend>Enter an URL:</legend>
 
-          <input type="text" placeholder="http://">
+          <input name="start-url" type="text" placeholder="http://">
 
-          <button type="submit" class="pure-button pure-button-primary">Crawl</button>
+          <button type="submit" class="trigger-crawl pure-button pure-button-primary">Crawl</button>
         </fieldset>
       </form>
+      <p>Total Urls <span data-id="total-urls"></span></p>
+      <p>Inbound Urls <span data-id="inbound-urls"></span></p>
+      <p>Outbound Urls <span data-id="outbound-urls"></span></p>
+      <p>Total Static <span data-id="total-static"></span></p>
+      <p>Inbound Static <span data-id="inbound-static"></span></p>
+      <p>Outbound Static <span data-id="outbound-static"></span></p>
+      <p>Cralwed <span data-id="crawled"></span></p>
+      <p>Remaining <span data-id="remaining"></span></p>
     </div>
 
   </div>
