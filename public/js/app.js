@@ -1,10 +1,19 @@
 
 var socket = io()
 
+socket.on('disconnect', x => {
+  $('#error').text('Server disconnected. Please refresh page')
+})
+
 $('form').on('submit', e => {
   e.preventDefault()
 
   let url = $('input[name="start-url"]').val()
+
+  if (url.match(/^https?:\/\//) === null) {
+    $('#error').text('Url must begin with http:// or https://')
+    return
+  }
 
   socket.emit('start-url', url)
 
@@ -46,7 +55,7 @@ socket.on('data', x => {
 
 socket.on('error', x => {
   console.error(x)
-  alert(x)
+  $('#error').text(x)
 })
 
 socket.on('data', x => {
