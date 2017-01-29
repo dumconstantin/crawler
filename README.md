@@ -24,4 +24,4 @@ npm install && npm start
 * [Docker](https://www.docker.com)
 * [Express](http://expressjs.com)
 * [Socket.io](http://socket.io)
-* [MostJS](https://github.com/cujojs/most)
+* [Most](https://github.com/cujojs/most)
