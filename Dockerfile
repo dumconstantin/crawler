@@ -6,4 +6,4 @@ ADD . /app
 
 RUN npm install
 
-CMD ["node", "server.js"]
+CMD ["./node_modules/.bin/forever", "server.js"]
